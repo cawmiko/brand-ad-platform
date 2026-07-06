@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>交易渠道品广一站式平台</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f8f9fb;
+    --bg-mute: #f1f3f5;
+    --border: #e9ecef;
+    --text: #1a1d21;
+    --text-secondary: #5f6368;
+    --text-muted: #9aa0a6;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --accent-hover: #1d4ed8;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --orange: #ea580c;
+    --orange-light: #fff7ed;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --purple: #7c3aed;
+    --purple-light: #f5f3ff;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.03);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif; background: var(--bg-soft); color: var(--text); line-height: 1.6; }
+
+  /* ─── Header ─── */
+  .header {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; height: 56px; padding: 0 24px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; margin-right: 40px;
+  }
+  .logo svg { flex-shrink: 0; }
+
+  /* ─── Nav ─── */
+  .nav { display: flex; gap: 0; height: 56px; align-items: stretch; }
+  .nav-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 18px; font-size: 13.5px; color: var(--text-secondary);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all 0.15s; white-space: nowrap; user-select: none;
+  }
+  .nav-item:hover { color: var(--accent); background: var(--accent-light); }
+  .nav-item.active { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent); }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* ─── Layout ─── */
+  .layout {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; min-height: calc(100vh - 56px);
+  }
+
+  /* ─── Sidebar ─── */
+  .sidebar {
+    width: 220px; background: var(--bg); border-right: 1px solid var(--border);
+    padding: 16px 0; flex-shrink: 0; overflow-y: auto;
+  }
+  .sidebar-title {
+    font-size: 10px; font-weight: 700; color: var(--text-muted);
+    padding: 10px 20px 6px; text-transform: uppercase; letter-spacing: 1.2px;
+  }
+  .sidebar-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 20px; font-size: 13px; color: var(--text-secondary);
+    cursor: pointer; border-left: 3px solid transparent; transition: all 0.12s;
+  }
+  .sidebar-link:hover { background: var(--bg-soft); color: var(--accent); }
+  .sidebar-link.active { background: var(--accent-light); color: var(--accent); font-weight: 600; border-left-color: var(--accent); }
+  .sidebar-link .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .sidebar-badge {
+    margin-left: auto; font-size: 10px; padding: 1px 7px;
+    border-radius: 10px; font-weight: 600;
+  }
+  .badge-hot { background: var(--red-light); color: var(--red); }
+  .badge-new { background: var(--green-light); color: var(--green); }
+
+  /* ─── Content ─── */
+  .content { flex: 1; padding: 24px 32px; overflow-y: auto; }
+
+  /* ─── Page header ─── */
+  .page-header {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 24px 28px; margin-bottom: 24px; box-shadow: var(--shadow-sm);
+  }
+  .page-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .page-header p { font-size: 13px; color: var(--text-secondary); }
+  .page-header .chips { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 500;
+    background: var(--bg-soft); color: var(--text-secondary); border: 1px solid var(--border);
+  }
+  .chip svg { width: 12px; height: 12px; }
+  .chip-accent { background: var(--accent-light); color: var(--accent); border-color: #dbeafe; }
+
+  /* ─── Card ─── */
+  .card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;
+  }
+  .card-body { padding: 20px; }
+
+  /* ─── Tabs ─── */
+  .tabs {
+    display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px;
+  }
+  .tab {
+    padding: 10px 20px; font-size: 13px; cursor: pointer; color: var(--text-secondary);
+    border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s;
+  }
+  .tab:hover { color: var(--accent); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  /* ─── SOP flow ─── */
+  .sop-phases { display: flex; gap: 8px; margin-bottom: 24px; }
+  .sop-phase {
+    padding: 7px 20px; border-radius: 20px; font-size: 13px; cursor: pointer;
+    background: var(--bg); border: 1px solid var(--border); transition: all 0.15s; color: var(--text-secondary);
+  }
+  .sop-phase.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+
+  .step-flow { display: flex; flex-direction: column; gap: 0; }
+  .step-row {
+    display: flex; align-items: flex-start; gap: 16px; position: relative;
+    padding: 16px 0;
+  }
+  .step-row:not(:last-child)::after {
+    content: ''; position: absolute; left: 19px; top: 52px; bottom: -4px;
+    width: 2px; background: var(--border);
+  }
+  .step-row.active .step-circle { box-shadow: 0 0 0 4px var(--accent-light); }
+  .step-circle {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff; position: relative; z-index: 1;
+  }
+  .step-circle.required { background: var(--accent); }
+  .step-circle.optional { background: #d1d5db; color: #6b7280; }
+  .step-content { flex: 1; padding-top: 2px; }
+  .step-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .step-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .step-meta { display: flex; gap: 12px; margin-top: 8px; }
+  .step-meta-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: var(--text-secondary); background: var(--bg-soft);
+    padding: 3px 10px; border-radius: 12px;
+  }
+  .step-meta-chip svg { width: 12px; height: 12px; }
+  .step-desc {
+    margin-top: 10px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;
+    padding: 12px 16px; background: var(--bg-soft); border-radius: var(--radius);
+  }
+  .step-links { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .step-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; background: var(--accent-light); border-radius: var(--radius);
+    font-size: 12px; color: var(--accent); cursor: pointer; transition: background 0.12s;
+    border: 1px solid #dbeafe;
+  }
+  .step-link:hover { background: #dbeafe; }
+  .step-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .tag-required {
+    font-size: 10px; padding: 2px 8px; border-radius: 10px;
+    background: var(--orange-light); color: var(--orange); font-weight: 600;
+  }
+  .tag-optional {
+    font-size: 10px; padding: 2px 8px; border-radius: 10px;
+    background: var(--bg-mute); color: var(--text-muted); font-weight: 600;
+  }
+
+  /* ─── Data table ─── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    background: var(--bg-soft); padding: 10px 16px; text-align: left;
+    font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border);
+    font-size: 12px; white-space: nowrap;
+  }
+  .data-table td { padding: 10px 16px; border-bottom: 1px solid #f3f4f6; color: var(--text); }
+  .data-table tr:hover td { background: var(--bg-soft); }
+
+  /* ─── Grid cards ─── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+
+  .kpi-card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 20px; text-align: center; box-shadow: var(--shadow-sm);
+  }
+  .kpi-value { font-size: 28px; font-weight: 800; }
+  .kpi-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .kpi-delta { font-size: 11px; margin-top: 6px; padding: 2px 8px; border-radius: 10px; display: inline-block; }
+  .delta-up { background: var(--green-light); color: var(--green); }
+  .delta-down { background: var(--red-light); color: var(--red); }
+
+  .doc-card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 20px; cursor: pointer; transition: all 0.15s;
+  }
+  .doc-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); }
+  .doc-card h4 { font-size: 14px; margin-bottom: 6px; }
+  .doc-card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+  .doc-card .doc-tag {
+    display: inline-block; padding: 2px 10px; border-radius: 10px;
+    font-size: 10px; font-weight: 600; margin-top: 10px;
+  }
+
+  .tool-card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;
+  }
+  .tool-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .tool-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+  }
+  .tool-card h4 { font-size: 14px; margin-bottom: 4px; }
+  .tool-card p { font-size: 12px; color: var(--text-muted); }
+
+  /* ─── Section gap ─── */
+  .section { margin-bottom: 24px; }
+
+  /* ─── Module panels ─── */
+  .mod-panel { display: none; }
+  .mod-panel.active { display: block; }
+
+  /* ─── Empty state ─── */
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--text-muted);
+  }
+  .empty-state svg { margin-bottom: 16px; opacity: 0.4; }
+  .empty-state h3 { font-size: 16px; color: var(--text-secondary); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .content { padding: 16px; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .nav-item { padding: 0 12px; font-size: 12px; }
+    .logo span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ Header ═══════ -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect width="28" height="28" rx="7" fill="#2563eb"/>
+        <path d="M8 9h12M8 14h8M8 19h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>交易渠道品广一站式平台</span>
+    </div>
+    <div class="nav" id="mainNav">
+      <div class="nav-item active" onclick="switchMod(0)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+        查售卖SOP
+      </div>
+      <div class="nav-item" onclick="switchMod(1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>
+        查报价
+      </div>
+      <div class="nav-item" onclick="switchMod(2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        查案例
+      </div>
+      <div class="nav-item" onclick="switchMod(3)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        查数据
+      </div>
+      <div class="nav-item" onclick="switchMod(4)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        查文档
+      </div>
+      <div class="nav-item" onclick="switchMod(5)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        找工具
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ Module 0: 查售卖SOP ═══════ -->
+<div class="mod-panel active" id="mod0">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-title">品广产品线</div>
+      <div class="sidebar-link active" onclick="switchProduct(this,'顶展')"><span class="dot" style="background:var(--accent)"></span>顶展</div>
+      <div class="sidebar-link" onclick="switchProduct(this,'钻展')"><span class="dot" style="background:var(--orange)"></span>钻展</div>
+      <div class="sidebar-link" onclick="switchProduct(this,'水牌')"><span class="dot" style="background:var(--green)"></span>水牌</div>
+      <div class="sidebar-link" onclick="switchProduct(this,'开屏')"><span class="dot" style="background:var(--red)"></span>开屏</div>
+      <div class="sidebar-link" onclick="switchProduct(this,'品牌专区')"><span class="dot" style="background:var(--purple)"></span>品牌专区</div>
+      <div class="sidebar-link" onclick="switchProduct(this,'导航结束页')"><span class="dot" style="background:#78716c"></span>导航结束页</div>
+      <div class="sidebar-title">更多产品</div>
+      <div class="sidebar-link" onclick="switchProduct(this,'语音播报')"><span class="dot" style="background:#0ea5e9"></span>语音播报</div>
+      <div class="sidebar-link" onclick="switchProduct(this,'打车广告')"><span class="dot" style="background:#f59e0b"></span>打车广告</div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1 id="sopTitle">顶展 · 售卖SOP流程引导</h1>
+        <p>从售前询价到配置上线，全流程细致引导</p>
+        <div class="chips">
+          <span class="chip chip-accent"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span> 必选 x7</span>
+          <span class="chip"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:#d1d5db"></span> 非必选 x2</span>
+          <span class="chip">步骤总数 9</span>
+        </div>
+      </div>
+
+      <div class="sop-phases">
+        <div class="sop-phase active">售前</div>
+        <div class="sop-phase">售中</div>
+        <div class="sop-phase">售后</div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="step-flow">
+            <!-- Step 1 -->
+            <div class="step-row active">
+              <div class="step-circle required">1</div>
+              <div class="step-content">
+                <div class="step-title">查刊例价 <span class="tag-required">必选</span></div>
+                <div class="step-subtitle">标准刊例表 / 标准规则</div>
+                <div class="step-meta">
+                  <span class="step-meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 即时 ≤30分钟</span>
+                  <span class="step-meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 渠道经理 / 服务商</span>
+                </div>
+                <div class="step-desc">在行业售卖文档中，查询各城市/类目的报价、折扣及售卖规则。所有价格信息均以最新售卖文档为准，渠道经理需在询价后确认档期可用性。</div>
+                <div class="step-links">
+                  <a class="step-link" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    【刊例】高德FY27-S1品牌广告资源刊例
+                  </a>
+                  <a class="step-link" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    【产品清单】品牌广告资源总览
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Step 2 -->
+            <div class="step-row">
+              <div class="step-circle required">2</div>
+              <div class="step-content">
+                <div class="step-title">自助询量 <span class="tag-required">必选</span></div>
+                <div class="step-subtitle">品广平台查询可售库存</div>
+                <div class="step-meta">
+                  <span class="step-meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ≤1小时</span>
+                </div>
+                <div class="step-desc">在品广平台查询目标城市/点位的可售库存与档期占用情况，确认可投放时间窗口。</div>
+                <div class="step-links">
+                  <a class="step-link" href="#" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    【占量】36城高频顶展排期占量表(T-1)
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Step 3 -->
+            <div class="step-row">
+              <div class="step-circle required">3</div>
+              <div class="step-content">
+                <div class="step-title">签约打款 <span class="tag-required">必选</span></div>
+                <div class="step-subtitle">合同签署 + 款项支付</div>
+                <div class="step-meta">
+                  <span class="step-meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 1-3个工作日</span>
+                </div>
+                <div class="step-desc">签署品牌广告合同，按合同约定金额打款至指定收款账号。注意双主体合同签约要求（打款云信/云鹰）。</div>
+                <div class="step-links">
+                  <a class="step-link" href="#" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    品牌广告合同模板
+                  </a>
+                  <a class="step-link" href="#" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    【账号&开票】广告收款账号&开票
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Step 4 -->
+            <div class="step-row">
+              <div class="step-circle required">4</div>
+              <div class="step-content">
+                <div class="step-title">素材制作与审核 <span class="tag-required">必选</span></div>
+                <div class="step-subtitle">创意素材提交 + 平台审核</div>
+                <div class="step-meta">
+                  <span class="step-meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 1-2个工作日</span>
+                </div>
+                <div class="step-desc">按照各产品线素材规范制作创意素材，提交平台审核。审核通过后进入配置环节。</div>
+              </div>
+            </div>
+            <!-- Step 5 -->
+            <div class="step-row">
+              <div class="step-circle required">5</div>
+              <div class="step-content">
+                <div class="step-title">配置上线 <span class="tag-required">必选</span></div>
+                <div class="step-subtitle">广告配置 + 正式投放</div>
+                <div class="step-meta">
+                  <span class="step-meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ≤1个工作日</span>
+                </div>
+                <div class="step-desc">在品广平台完成广告配置并上线投放，确认投放状态正常。</div>
+                <div class="step-links">
+                  <a class="step-link" href="#" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    顶展未展示问题排查 SOP
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Step 6 -->
+            <div class="step-row">
+              <div class="step-circle required">6</div>
+              <div class="step-content">
+                <div class="step-title">投放数据 <span class="tag-required">必选</span></div>
+                <div class="step-subtitle">数据监测 + 效果回收</div>
+                <div class="step-meta">
+                  <span class="step-meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 投放期间持续</span>
+                </div>
+                <div class="step-desc">投放期间持续监测曝光、点击、到店等核心指标，投放结束后回收效果数据形成结案报告。</div>
+              </div>
+            </div>
+            <!-- Step 7 -->
+            <div class="step-row">
+              <div class="step-circle required">7</div>
+              <div class="step-content">
+                <div class="step-title">开票 <span class="tag-required">必选</span></div>
+                <div class="step-subtitle">投放结束 + 发票开具</div>
+                <div class="step-meta">
+                  <span class="step-meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 5-10个工作日</span>
+                </div>
+                <div class="step-desc">投放结束后，按合同约定提交开票申请，财务审核通过后开具发票。</div>
+              </div>
+            </div>
+            <!-- Step 8 optional -->
+            <div class="step-row">
+              <div class="step-circle optional">8</div>
+              <div class="step-content">
+                <div class="step-title">注册PID <span class="tag-optional">非必选</span></div>
+                <div class="step-subtitle">服务商/品牌方注册投放PID</div>
+                <div class="step-desc">部分场景下需要服务商或品牌方注册投放PID，用于广告归因追踪。</div>
+              </div>
+            </div>
+            <!-- Step 9 optional -->
+            <div class="step-row">
+              <div class="step-circle optional">9</div>
+              <div class="step-content">
+                <div class="step-title">H5外链加白 <span class="tag-optional">非必选</span></div>
+                <div class="step-subtitle">落地页域名加白申请</div>
+                <div class="step-desc">如品广落地页使用H5页面且包含外部链接，需提前完成外链域名加白申请。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ Module 1: 查报价 ═══════ -->
+<div class="mod-panel" id="mod1">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-title">报价查询</div>
+      <div class="sidebar-link active"><span class="dot" style="background:var(--accent)"></span>产品资源总览</div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--orange)"></span>顶展报价</div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--green)"></span>钻展报价</div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--red)"></span>水牌报价</div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--purple)"></span>开屏报价</div>
+      <div class="sidebar-title">通用文档</div>
+      <div class="sidebar-link">【刊例】FY27-S1资源刊例</div>
+      <div class="sidebar-link">【规则】作业规则</div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1>品牌广告资源总览</h1>
+        <p>全产品线刊例价、折扣、起售门槛一览表</p>
+        <div class="chips">
+          <span class="chip chip-accent">来源：【产品清单】品牌广告资源总览</span>
+          <span class="chip">FY27-S1 有效</span>
+        </div>
+      </div>
+
+      <div class="card section">
+        <div class="card-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>
+          产品资源清单
+        </div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>类型</th><th>产品名称</th><th>产品位置</th><th>广告形式</th><th>售卖方式</th><th>刊例单价(元)</th><th>折扣</th><th>起售门槛</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>展示</td><td style="font-weight:600;">开屏-CPM</td><td>开屏广告</td><td>静态/视频3S</td><td>CPM</td><td style="font-weight:700;color:var(--accent);">¥96</td><td>40%</td><td><span style="color:var(--red);font-weight:600;">10万(净价)</span></td></tr>
+              <tr><td>展示</td><td style="font-weight:600;">顶展-CPT</td><td>搜索结果顶部</td><td>静态/视频</td><td>CPT(周)</td><td style="font-weight:700;color:var(--accent);">按城市</td><td>按城市等级</td><td><span style="color:var(--red);font-weight:600;">5万(净价)</span></td></tr>
+              <tr><td>展示</td><td style="font-weight:600;">钻展-CPM</td><td>信息流</td><td>静态/视频</td><td>CPM</td><td style="font-weight:700;color:var(--accent);">¥35</td><td>50%</td><td><span style="color:var(--red);font-weight:600;">3万(净价)</span></td></tr>
+              <tr><td>展示</td><td style="font-weight:600;">水牌-CPM</td><td>详情页</td><td>静态</td><td>CPM</td><td style="font-weight:700;color:var(--accent);">¥25</td><td>50%</td><td><span style="color:var(--red);font-weight:600;">2万(净价)</span></td></tr>
+              <tr><td>品牌</td><td style="font-weight:600;">品牌专区</td><td>品牌搜索结果</td><td>品专卡片</td><td>CPT(月)</td><td style="font-weight:700;color:var(--accent);">按品牌</td><td>一事一议</td><td><span style="color:var(--red);font-weight:600;">10万(净价)</span></td></tr>
+              <tr><td>场景</td><td style="font-weight:600;">导航结束页</td><td>导航到达页</td><td>静态/视频</td><td>CPM</td><td style="font-weight:700;color:var(--accent);">¥30</td><td>45%</td><td><span style="color:var(--red);font-weight:600;">3万(净价)</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          售卖规则说明
+        </div>
+        <div class="card-body" style="font-size:13px;color:var(--text-secondary);line-height:1.8;">
+          <p>以上价格为标准刊例价，实际执行价按城市等级、行业类目、投放周期综合折扣确定。详细折扣体系参见 <strong>【刊例】高德FY27-S1品牌广告资源刊例</strong> 及 <strong>【规则】品牌广告作业规则</strong>。组合购（品广+效广/品广+智能体）可享额外优惠，具体政策请咨询品广运营同学。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ Module 2: 查案例 ═══════ -->
+<div class="mod-panel" id="mod2">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-title">按产品线</div>
+      <div class="sidebar-link active"><span class="dot" style="background:var(--accent)"></span>全部案例</div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--accent)"></span>顶展案例</div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--orange)"></span>钻展案例</div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--green)"></span>水牌案例</div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--red)"></span>开屏案例</div>
+      <div class="sidebar-title">按行业</div>
+      <div class="sidebar-link">美食-本地中餐</div>
+      <div class="sidebar-link">美食-火锅</div>
+      <div class="sidebar-link">美食-烧烤</div>
+      <div class="sidebar-link">美食-饮品甜品</div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1>品广案例库</h1>
+        <p>美食渠道品牌广告优秀案例集合，按产品线与行业分类检索</p>
+        <div class="chips">
+          <span class="chip chip-accent">来源：月度品广简报&案例</span>
+        </div>
+      </div>
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <h3>案例库建设中</h3>
+        <p>案例数据将来自知识库"月度品广简报&案例"文件夹，按产品线与行业分类展示</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ Module 3: 查数据 ═══════ -->
+<div class="mod-panel" id="mod3">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-title">数据看板</div>
+      <div class="sidebar-link active"><span class="dot" style="background:var(--accent)"></span>36城占量表 <span class="sidebar-badge badge-hot">T-1</span></div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--green)"></span>品广产品计划明细</div>
+      <div class="sidebar-link"><span class="dot" style="background:var(--orange)"></span>渠道品广营收看板</div>
+      <div class="sidebar-title">辅助数据</div>
+      <div class="sidebar-link">景区品广上线信息</div>
+      <div class="sidebar-link">月度品广简报</div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1>品广数据看板</h1>
+        <p>品牌广告占量、投放、营收数据一站式查询</p>
+        <div class="chips">
+          <span class="chip chip-accent">核心：36城高频顶展排期占量表(T-1)</span>
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <div class="kpi-card"><div class="kpi-value" style="color:var(--accent);">156</div><div class="kpi-label">美食顶展在投点位</div><div class="kpi-delta delta-up">+12 vs 上月</div></div>
+        <div class="kpi-card"><div class="kpi-value" style="color:var(--orange);">78%</div><div class="kpi-label">核心城市占位率</div><div class="kpi-delta delta-down">-3% vs 上月</div></div>
+        <div class="kpi-card"><div class="kpi-value" style="color:var(--green);">¥2.8M</div><div class="kpi-label">本月品广营收</div><div class="kpi-delta delta-up">+18% vs 上月</div></div>
+        <div class="kpi-card"><div class="kpi-value" style="color:var(--purple);">42</div><div class="kpi-label">在投服务商数</div><div class="kpi-delta delta-up">+5 vs 上月</div></div>
+      </div>
+
+      <div class="card section">
+        <div class="card-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          各产品线占量分布
+        </div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>产品线</th><th>总点位</th><th>已售</th><th>可售</th><th>占位率</th><th>本月营收</th><th>环比</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600;">顶展</td><td>156</td><td>122</td><td>34</td><td><span style="color:var(--green);font-weight:600;">78.2%</span></td><td style="font-weight:600;">¥1,250,000</td><td><span class="kpi-delta delta-up" style="font-size:11px;">+15%</span></td></tr>
+              <tr><td style="font-weight:600;">钻展</td><td>230</td><td>145</td><td>85</td><td><span style="color:var(--orange);font-weight:600;">63.0%</span></td><td style="font-weight:600;">¥680,000</td><td><span class="kpi-delta delta-up" style="font-size:11px;">+22%</span></td></tr>
+              <tr><td style="font-weight:600;">水牌</td><td>89</td><td>52</td><td>37</td><td><span style="color:var(--orange);font-weight:600;">58.4%</span></td><td style="font-weight:600;">¥420,000</td><td><span class="kpi-delta delta-down" style="font-size:11px;">-5%</span></td></tr>
+              <tr><td style="font-weight:600;">开屏</td><td>45</td><td>38</td><td>7</td><td><span style="color:var(--green);font-weight:600;">84.4%</span></td><td style="font-weight:600;">¥320,000</td><td><span class="kpi-delta delta-up" style="font-size:11px;">+8%</span></td></tr>
+              <tr><td style="font-weight:600;">品牌专区</td><td>28</td><td>18</td><td>10</td><td><span style="color:var(--orange);font-weight:600;">64.3%</span></td><td style="font-weight:600;">¥180,000</td><td><span class="kpi-delta delta-up" style="font-size:11px;">+30%</span></td></tr>
+              <tr><td style="font-weight:600;">导航结束页</td><td>120</td><td>65</td><td>55</td><td><span style="color:var(--orange);font-weight:600;">54.2%</span></td><td style="font-weight:600;">¥95,000</td><td><span class="kpi-delta delta-down" style="font-size:11px;">-2%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ Module 4: 查文档 ═══════ -->
+<div class="mod-panel" id="mod4">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-title">售卖政策与规则</div>
+      <div class="sidebar-link active">【刊例】FY27-S1资源刊例</div>
+      <div class="sidebar-link">【产品清单】资源总览</div>
+      <div class="sidebar-link">【规则】作业规则</div>
+      <div class="sidebar-link">【规则】作业规则更新(3.11)</div>
+      <div class="sidebar-link">【退款】退款操作SOP</div>
+      <div class="sidebar-title">合同与财务</div>
+      <div class="sidebar-link">品牌广告合同</div>
+      <div class="sidebar-link">广告收款账号&开票</div>
+      <div class="sidebar-link">双主体合同签约说明</div>
+      <div class="sidebar-title">培训与技能</div>
+      <div class="sidebar-link">品广培训材料-完整版</div>
+      <div class="sidebar-link">售卖分享(销售技能)</div>
+      <div class="sidebar-link">AI对练路径</div>
+      <div class="sidebar-link">广告话术锦囊</div>
+      <div class="sidebar-title">售前支持</div>
+      <div class="sidebar-link">广告营收作战牵引</div>
+      <div class="sidebar-link">商业化流转机制-7月</div>
+      <div class="sidebar-link">品牌智能体</div>
+      <div class="sidebar-link">代运营服务包</div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1>文档与知识库</h1>
+        <p>品广售卖政策、操作手册、行业知识一站式查阅</p>
+        <div class="chips">
+          <span class="chip chip-accent">来源：交易渠道知识库 > 品广专区</span>
+          <a class="chip" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank" style="text-decoration:none;">打开知识库</a>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <a class="doc-card" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank" style="text-decoration:none;color:inherit;">
+          <h4>【刊例】高德FY27-S1品牌广告资源刊例</h4>
+          <p>全产品线刊例价、折扣体系、售卖方式、起售门槛</p>
+          <span class="doc-tag" style="background:var(--accent-light);color:var(--accent);">刊例</span>
+        </a>
+        <a class="doc-card" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank" style="text-decoration:none;color:inherit;">
+          <h4>【产品清单】品牌广告资源总览</h4>
+          <p>产品资源清单表：类型/名称/位置/广告形式/售卖方式/刊例价/折扣/门槛</p>
+          <span class="doc-tag" style="background:var(--green-light);color:var(--green);">产品清单</span>
+        </a>
+        <a class="doc-card" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank" style="text-decoration:none;color:inherit;">
+          <h4>【规则】品牌广告作业规则及逆向管理要求</h4>
+          <p>品广作业全流程规则，含下单/配置/验收/逆向管理（2026.3.11更新版）</p>
+          <span class="doc-tag" style="background:var(--orange-light);color:var(--orange);">规则</span>
+        </a>
+        <a class="doc-card" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank" style="text-decoration:none;color:inherit;">
+          <h4>品牌广告合同 & 收款账号 & 开票</h4>
+          <p>合同模板、广告收款账号、开票流程、双主体合同签约补充说明</p>
+          <span class="doc-tag" style="background:var(--accent-light);color:var(--accent);">合同财务</span>
+        </a>
+        <a class="doc-card" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank" style="text-decoration:none;color:inherit;">
+          <h4>美食行业品牌广告培训材料-完整版</h4>
+          <p>渠道经理/服务商品广培训全套：产品知识、售卖技巧、操作指南</p>
+          <span class="doc-tag" style="background:var(--green-light);color:var(--green);">培训</span>
+        </a>
+        <a class="doc-card" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank" style="text-decoration:none;color:inherit;">
+          <h4>【广告退款】退款操作链路SOP</h4>
+          <p>品广退款全流程操作指引：退款条件、审批流程、系统操作</p>
+          <span class="doc-tag" style="background:var(--orange-light);color:var(--orange);">退款SOP</span>
+        </a>
+        <a class="doc-card" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank" style="text-decoration:none;color:inherit;">
+          <h4>广告营收作战牵引 & 商业化流转机制</h4>
+          <p>售前广告营收作战指引，美食商业化流转机制（7月版）</p>
+          <span class="doc-tag" style="background:var(--accent-light);color:var(--accent);">售前支持</span>
+        </a>
+        <a class="doc-card" href="https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG32e41ot1BKxgLgV6EDybno" target="_blank" style="text-decoration:none;color:inherit;">
+          <h4>广告话术锦囊 & AI对练路径</h4>
+          <p>品广售卖话术集合、交易渠道AI对练路径，提升售卖能力</p>
+          <span class="doc-tag" style="background:var(--green-light);color:var(--green);">销售技能</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ Module 5: 找工具 ═══════ -->
+<div class="mod-panel" id="mod5">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-title">常用工具</div>
+      <div class="sidebar-link active">高德内链生成</div>
+      <div class="sidebar-link">外链加白</div>
+      <div class="sidebar-link">H5搭建</div>
+      <div class="sidebar-link">纵横-视频图片转码</div>
+      <div class="sidebar-link">草料二维码</div>
+      <div class="sidebar-link">天眼-盘货ID</div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1>工具集合</h1>
+        <p>品广投放常用工具一站式入口</p>
+      </div>
+      <div class="grid-3">
+        <div class="tool-card">
+          <div class="tool-icon" style="background:var(--accent-light);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <h4>高德内链生成</h4>
+          <p>生成高德App内部跳转链接</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-icon" style="background:var(--orange-light);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </div>
+          <h4>外链加白</h4>
+          <p>H5落地页外链域名加白申请</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-icon" style="background:var(--green-light);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h4>H5搭建</h4>
+          <p>品牌广告H5落地页快速搭建</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-icon" style="background:var(--red-light);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          </div>
+          <h4>纵横-视频图片转码</h4>
+          <p>品广素材视频/图片格式转码</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-icon" style="background:var(--purple-light);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </div>
+          <h4>草料二维码</h4>
+          <p>快速生成二维码，投放物料分发</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-icon" style="background:#f0fdf4;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <h4>天眼-盘货ID</h4>
+          <p>品广库存盘点与ID管理</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchMod(idx) {
+  document.querySelectorAll('#mainNav .nav-item').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.mod-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  window.scrollTo(0,0);
+}
+function switchProduct(el, name) {
+  el.parentElement.querySelectorAll('.sidebar-link').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sopTitle').textContent = name + ' · 售卖SOP流程引导';
+}
+</script>
+</body>
+</html>

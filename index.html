@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>交易渠道品广一站式平台</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #ffffff;
@@ -329,6 +330,38 @@
   .drill-tag svg { width: 12px; height: 12px; }
   .drill-tag:hover { background: #dbeafe; }
 
+  /* ─── Multi-select tags ─── */
+  .drill-selected-tags {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; min-height: 0;
+  }
+  .drill-sel-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px 3px 10px; border-radius: 14px; font-size: 12px; font-weight: 500;
+    background: var(--accent-light); color: var(--accent); border: 1px solid #dbeafe;
+    animation: tagIn 0.15s ease;
+  }
+  @keyframes tagIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+  .drill-sel-tag .tag-x {
+    width: 14px; height: 14px; cursor: pointer; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s; flex-shrink: 0;
+  }
+  .drill-sel-tag .tag-x:hover { background: rgba(37,99,235,0.15); }
+  .drill-sel-tag .tag-x svg { width: 10px; height: 10px; }
+  .drill-export-btn {
+    padding: 8px 20px; background: var(--green); color: #fff; border: none; border-radius: var(--radius);
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .drill-export-btn:hover { background: #15803d; }
+  .drill-export-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .drill-export-btn svg { width: 14px; height: 14px; }
+  .drill-batch-add {
+    font-size: 11px; color: var(--accent); cursor: pointer; padding: 4px 8px;
+    border-radius: 4px; transition: background 0.12s; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .drill-batch-add:hover { background: var(--accent-light); }
+
   /* ─── Empty state ─── */
   .empty-state {
     text-align: center; padding: 60px 20px; color: var(--text-muted);
@@ -636,23 +669,33 @@
         <!-- Filter bar -->
         <div class="drill-filter-bar">
           <div class="drill-filter-group" style="flex:1;min-width:240px;">
-            <label>行业类目</label>
+            <label>行业类目 <span style="font-weight:400;color:var(--text-muted);">（可多选）</span></label>
             <div class="drill-search-select" id="drillCatSelect">
               <svg class="drill-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input class="drill-search-input" id="drillCatInput" placeholder="搜索类目，如：火锅、川菜、中餐..." autocomplete="off">
               <div class="drill-dropdown" id="drillCatDropdown"></div>
             </div>
+            <div class="drill-selected-tags" id="drillCatTags"></div>
           </div>
           <div class="drill-filter-group" style="flex:1;min-width:200px;">
-            <label>城市</label>
+            <label>城市 <span style="font-weight:400;color:var(--text-muted);">（可多选）</span></label>
             <div class="drill-search-select" id="drillCitySelect">
               <svg class="drill-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input class="drill-search-input" id="drillCityInput" placeholder="搜索城市，如：北京、上海、杭州..." autocomplete="off">
               <div class="drill-dropdown" id="drillCityDropdown"></div>
             </div>
+            <div class="drill-selected-tags" id="drillCityTags"></div>
           </div>
-          <button class="drill-filter-btn" onclick="drillSearch()">查询报价</button>
-          <button class="drill-reset-btn" onclick="drillReset()">重置</button>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <button class="drill-filter-btn" onclick="drillSearch()">查询报价</button>
+            <div style="display:flex;gap:6px;">
+              <button class="drill-reset-btn" onclick="drillReset()">重置</button>
+              <button class="drill-export-btn" id="drillExportBtn" onclick="drillExportExcel()" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                下载Excel
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Active filters -->
@@ -948,33 +991,31 @@ const DRILL_CITIES=["七台河市","万宁市","三亚市","三明市","三门�
 const DRILL_TOP_CATS={"东南亚菜":["美食;东南亚菜"],"中餐":["美食;中餐","美食;中餐;上海菜","美食;中餐;东北菜","美食;中餐;云南菜","美食;中餐;内蒙菜","美食;中餐;北京菜","美食;中餐;台湾菜","美食;中餐;天津菜","美食;中餐;山西菜","美食;中餐;川菜","美食;中餐;广西菜","美食;中餐;徽菜","美食;中餐;江浙菜","美食;中餐;江西菜","美食;中餐;河北菜","美食;中餐;河南菜","美食;中餐;海南菜","美食;中餐;湖北菜","美食;中餐;湘菜","美食;中餐;澳门菜","美食;中餐;粤菜","美食;中餐;茶餐厅","美食;中餐;西北菜","美食;中餐;西藏菜","美食;中餐;贵州菜","美食;中餐;闽菜","美食;中餐;香港菜","美食;中餐;鲁菜"],"小吃快餐":["美食;小吃快餐","美食;小吃快餐;元宵","美食;小吃快餐;凉皮","美食;小吃快餐;包子","美食;小吃快餐;北京小吃","美食;小吃快餐;川味小吃","美食;小吃快餐;广式点心","美食;小吃快餐;抄手","美食;小吃快餐;汤","美食;小吃快餐;汤圆","美食;小吃快餐;烧麦","美食;小吃快餐;特色小吃","美食;小吃快餐;米粉","美食;小吃快餐;米线","美食;小吃快餐;粥","美食;小吃快餐;羊肉泡馍","美食;小吃快餐;肉夹馍","美食;小吃快餐;肠粉","美食;小吃快餐;臭豆腐","美食;小吃快餐;西式快餐","美食;小吃快餐;锅贴","美食;小吃快餐;面馆","美食;小吃快餐;饭","美食;小吃快餐;饺子","美食;小吃快餐;饼","美食;小吃快餐;馄饨","美食;小吃快餐;馒头","美食;小吃快餐;驴肉火烧","美食;小吃快餐;麻辣拌"],"日本料理":["美食;日本料理"],"水产海鲜":["美食;水产海鲜","美食;水产海鲜;小龙虾","美食;水产海鲜;海鲜","美食;水产海鲜;鱼"],"火锅":["美食;火锅","美食;火锅;串串香","美食;火锅;云南火锅","美食;火锅;四川火锅","美食;火锅;小火锅","美食;火锅;打边炉","美食;火锅;椰子鸡","美食;火锅;毛肚火锅","美食;火锅;泰式火锅","美食;火锅;海鲜火锅","美食;火锅;涮羊肉","美食;火锅;潮汕火锅","美食;火锅;澳门豆捞","美食;火锅;火锅鸡","美食;火锅;牛肉火锅","美食;火锅;猪肚鸡","美食;火锅;羊蝎子火锅","美食;火锅;老北京火锅","美食;火锅;蒸汽火锅","美食;火锅;重庆火锅","美食;火锅;鱼火锅"],"烧烤":["美食;烧烤"],"熟食":["美食;熟食"],"特色菜系":["美食;特色菜系;农家菜","美食;特色菜系;大排档","美食;特色菜系;家常菜","美食;特色菜系;私房菜","美食;特色菜系;素菜馆"],"甜品店":["美食;甜品店"],"糕点/烘焙":["美食;糕点/烘焙","美食;糕点/烘焙;西式糕点"],"自助餐":["美食;自助餐","美食;自助餐;日式自助","美食;自助餐;自助快餐","美食;自助餐;自助海鲜","美食;自助餐;自助火锅","美食;自助餐;自助烤肉"],"西餐":["美食;西餐","美食;西餐;俄国菜","美食;西餐;墨西哥菜","美食;西餐;巴西菜","美食;西餐;希腊菜","美食;西餐;德国菜","美食;西餐;意大利菜","美食;西餐;法国菜","美食;西餐;牛排","美食;西餐;西班牙菜"],"韩国料理":["美食;韩国料理"],"饮品":["美食;饮品","美食;饮品;咖啡","美食;饮品;奶茶/茶饮"]};
 
 /* ── Drill pricing state ── */
-let drillSelCat = null, drillSelCity = null;
+let drillSelCats = [];  // multi-select: array of category strings
+let drillSelCities = []; // multi-select: array of city strings
 let drillResults = [];
 let drillPage = 1;
 const DRILL_PAGE_SIZE = 50;
+const TAG_X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
-/* ── Searchable select logic ── */
+/* ── Searchable multi-select logic ── */
 function initDrillSelects() {
-  // Category select
   const catInput = document.getElementById('drillCatInput');
   const catDrop = document.getElementById('drillCatDropdown');
-  catInput.addEventListener('focus', () => { renderCatDropdown(''); catDrop.classList.add('open'); });
+  catInput.addEventListener('focus', () => { renderCatDropdown(catInput.value.trim()); catDrop.classList.add('open'); });
   catInput.addEventListener('input', () => { renderCatDropdown(catInput.value.trim()); catDrop.classList.add('open'); });
   document.getElementById('drillCatSelect').addEventListener('focusout', (e) => {
-    if (!e.relatedTarget || !document.getElementById('drillCatSelect').contains(e.relatedTarget)) {
+    if (!e.relatedTarget || !document.getElementById('drillCatSelect').contains(e.relatedTarget))
       setTimeout(() => catDrop.classList.remove('open'), 150);
-    }
   });
 
-  // City select
   const cityInput = document.getElementById('drillCityInput');
   const cityDrop = document.getElementById('drillCityDropdown');
-  cityInput.addEventListener('focus', () => { renderCityDropdown(''); cityDrop.classList.add('open'); });
+  cityInput.addEventListener('focus', () => { renderCityDropdown(cityInput.value.trim()); cityDrop.classList.add('open'); });
   cityInput.addEventListener('input', () => { renderCityDropdown(cityInput.value.trim()); cityDrop.classList.add('open'); });
   document.getElementById('drillCitySelect').addEventListener('focusout', (e) => {
-    if (!e.relatedTarget || !document.getElementById('drillCitySelect').contains(e.relatedTarget)) {
+    if (!e.relatedTarget || !document.getElementById('drillCitySelect').contains(e.relatedTarget))
       setTimeout(() => cityDrop.classList.remove('open'), 150);
-    }
   });
 }
 
@@ -988,17 +1029,13 @@ function renderCatDropdown(query) {
     const filtered = items.filter(c => !q || c.toLowerCase().includes(q));
     if (filtered.length === 0) continue;
     html += '<div class="drill-dropdown-group">';
-    html += '<div class="drill-dropdown-group-label">' + group + ' (' + filtered.length + ')</div>';
+    html += '<div class="drill-dropdown-group-label">' + group + ' (' + filtered.length + ') <span class="drill-batch-add" onclick="event.stopPropagation();batchAddCats(\'' + group + '\')">+ 全选本组</span></div>';
     for (const cat of filtered) {
       const display = cat.split(';').slice(1).join(' > ');
-      const sel = drillSelCat === cat ? ' selected' : '';
-      html += '<div class="drill-dropdown-item' + sel + '" onclick="selectCat(\x27' + cat.replace(/'/g, "\\'") + '\x27,\x27' + display.replace(/'/g, "\\'") + '\x27)">' + display + '</div>';
+      const checked = drillSelCats.includes(cat);
+      html += '<div class="drill-dropdown-item' + (checked ? ' selected' : '') + '" onclick="toggleCat(\'' + cat.replace(/'/g, "\\'") + '\')">' + (checked ? '✓ ' : '') + display + '</div>';
     }
     html += '</div>';
-  }
-  // Add "全部类目" option at top
-  if (!q) {
-    html = '<div class="drill-dropdown-item' + (!drillSelCat ? ' selected' : '') + '" onclick="selectCat(null,\x27全部类目\x27)">全部类目（' + DRILL_CATS.length + '）</div>' + html;
   }
   catDrop.innerHTML = html || '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px;">未找到匹配类目</div>';
 }
@@ -1008,74 +1045,136 @@ function renderCityDropdown(query) {
   const q = query.toLowerCase();
   const filtered = DRILL_CITIES.filter(c => !q || c.toLowerCase().includes(q));
   let html = '';
-  if (!q) {
-    html += '<div class="drill-dropdown-item' + (!drillSelCity ? ' selected' : '') + '" onclick="selectCity(null,\x27全部城市\x27)">全部城市（' + DRILL_CITIES.length + '）</div>';
+  if (filtered.length > 0 && q) {
+    html += '<div class="drill-dropdown-group-label">匹配 ' + filtered.length + ' 个城市 <span class="drill-batch-add" onclick="event.stopPropagation();batchAddCities()">+ 全选匹配</span></div>';
   }
-  for (const city of filtered.slice(0, 100)) {
-    const sel = drillSelCity === city ? ' selected' : '';
-    html += '<div class="drill-dropdown-item' + sel + '" onclick="selectCity(\x27' + city + '\x27,\x27' + city + '\x27)">' + city + '</div>';
+  for (const city of filtered.slice(0, 150)) {
+    const checked = drillSelCities.includes(city);
+    html += '<div class="drill-dropdown-item' + (checked ? ' selected' : '') + '" onclick="toggleCity(\'' + city + '\')">' + (checked ? '✓ ' : '') + city + '</div>';
   }
-  if (filtered.length > 100) {
-    html += '<div style="padding:8px 14px;font-size:11px;color:var(--text-muted);">...还有 ' + (filtered.length - 100) + ' 个城市，请缩小搜索范围</div>';
+  if (filtered.length > 150) {
+    html += '<div style="padding:8px 14px;font-size:11px;color:var(--text-muted);">...还有 ' + (filtered.length - 150) + ' 个城市，请缩小搜索范围</div>';
   }
   cityDrop.innerHTML = html || '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px;">未找到匹配城市</div>';
 }
 
-function selectCat(val, display) {
-  drillSelCat = val;
-  document.getElementById('drillCatInput').value = display;
-  document.getElementById('drillCatDropdown').classList.remove('open');
+function toggleCat(cat) {
+  const idx = drillSelCats.indexOf(cat);
+  if (idx >= 0) drillSelCats.splice(idx, 1);
+  else drillSelCats.push(cat);
+  renderCatTags();
+  renderCatDropdown(document.getElementById('drillCatInput').value.trim());
 }
 
-function selectCity(val, display) {
-  drillSelCity = val;
-  document.getElementById('drillCityInput').value = display;
-  document.getElementById('drillCityDropdown').classList.remove('open');
+function toggleCity(city) {
+  const idx = drillSelCities.indexOf(city);
+  if (idx >= 0) drillSelCities.splice(idx, 1);
+  else drillSelCities.push(city);
+  renderCityTags();
+  renderCityDropdown(document.getElementById('drillCityInput').value.trim());
+}
+
+function batchAddCats(group) {
+  const items = DRILL_TOP_CATS[group] || [];
+  for (const cat of items) {
+    if (!drillSelCats.includes(cat)) drillSelCats.push(cat);
+  }
+  renderCatTags();
+  renderCatDropdown(document.getElementById('drillCatInput').value.trim());
+}
+
+function batchAddCities() {
+  const q = document.getElementById('drillCityInput').value.trim().toLowerCase();
+  const filtered = DRILL_CITIES.filter(c => !q || c.toLowerCase().includes(q));
+  for (const city of filtered) {
+    if (!drillSelCities.includes(city)) drillSelCities.push(city);
+  }
+  renderCityTags();
+  renderCityDropdown(document.getElementById('drillCityInput').value.trim());
+}
+
+function removeCat(cat) {
+  drillSelCats = drillSelCats.filter(c => c !== cat);
+  renderCatTags();
+  renderCatDropdown(document.getElementById('drillCatInput').value.trim());
+}
+
+function removeCity(city) {
+  drillSelCities = drillSelCities.filter(c => c !== city);
+  renderCityTags();
+  renderCityDropdown(document.getElementById('drillCityInput').value.trim());
+}
+
+function renderCatTags() {
+  const el = document.getElementById('drillCatTags');
+  if (drillSelCats.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = drillSelCats.map(cat => {
+    const display = cat.split(';').slice(1).join(' > ');
+    return '<span class="drill-sel-tag">' + display + '<span class="tag-x" onclick="removeCat(\'' + cat.replace(/'/g, "\\'") + '\')">' + TAG_X_SVG + '</span></span>';
+  }).join('');
+}
+
+function renderCityTags() {
+  const el = document.getElementById('drillCityTags');
+  if (drillSelCities.length === 0) { el.innerHTML = ''; return; }
+  const maxShow = 20;
+  let html = drillSelCities.slice(0, maxShow).map(city =>
+    '<span class="drill-sel-tag">' + city + '<span class="tag-x" onclick="removeCity(\'' + city + '\')">' + TAG_X_SVG + '</span></span>'
+  ).join('');
+  if (drillSelCities.length > maxShow) {
+    html += '<span class="drill-sel-tag" style="background:var(--bg-mute);color:var(--text-secondary);">+' + (drillSelCities.length - maxShow) + ' 更多</span>';
+  }
+  el.innerHTML = html;
 }
 
 function drillSearch() {
-  const cat = drillSelCat;
-  const city = drillSelCity;
-  if (!cat && !city) {
-    drillResults = DRILL_DATA;
-  } else if (cat && city) {
-    drillResults = DRILL_DATA.filter(r => r[0] === cat && r[1] === city);
-  } else if (cat) {
-    drillResults = DRILL_DATA.filter(r => r[0] === cat);
+  const cats = drillSelCats;
+  const cities = drillSelCities;
+  if (cats.length === 0 && cities.length === 0) {
+    drillResults = DRILL_DATA.slice();
+  } else if (cats.length > 0 && cities.length > 0) {
+    drillResults = DRILL_DATA.filter(r => cats.includes(r[0]) && cities.includes(r[1]));
+  } else if (cats.length > 0) {
+    drillResults = DRILL_DATA.filter(r => cats.includes(r[0]));
   } else {
-    drillResults = DRILL_DATA.filter(r => r[1] === city);
+    drillResults = DRILL_DATA.filter(r => cities.includes(r[1]));
   }
   drillPage = 1;
   renderDrillResults();
   renderActiveFilters();
+  document.getElementById('drillExportBtn').disabled = drillResults.length === 0;
 }
 
 function drillReset() {
-  drillSelCat = null;
-  drillSelCity = null;
+  drillSelCats = [];
+  drillSelCities = [];
   drillResults = [];
   drillPage = 1;
   document.getElementById('drillCatInput').value = '';
   document.getElementById('drillCityInput').value = '';
+  document.getElementById('drillCatTags').innerHTML = '';
+  document.getElementById('drillCityTags').innerHTML = '';
   document.getElementById('drillResultBody').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-muted);">请选择类目和/或城市后点击「查询报价」</td></tr>';
   document.getElementById('drillTotalCount').textContent = '0';
   document.getElementById('drillPagination').style.display = 'none';
   document.getElementById('drillActiveFilters').style.display = 'none';
+  document.getElementById('drillExportBtn').disabled = true;
 }
 
 function renderActiveFilters() {
   const el = document.getElementById('drillActiveFilters');
-  if (!drillSelCat && !drillSelCity) { el.style.display = 'none'; return; }
+  if (drillSelCats.length === 0 && drillSelCities.length === 0) { el.style.display = 'none'; return; }
   el.style.display = 'flex';
+  el.style.flexWrap = 'wrap';
   el.style.gap = '6px';
   el.style.alignItems = 'center';
   let html = '<span style="font-size:12px;color:var(--text-muted);margin-right:4px;">筛选条件：</span>';
-  if (drillSelCat) {
-    const display = drillSelCat.split(';').slice(1).join(' > ');
-    html += '<span class="drill-tag" onclick="selectCat(null,\x27\x27);drillSearch();">' + display + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>';
+  for (const cat of drillSelCats) {
+    const display = cat.split(';').slice(1).join(' > ');
+    html += '<span class="drill-tag" onclick="removeCat(\'' + cat.replace(/'/g, "\\'") + '\');drillSearch();">' + display + ' ' + TAG_X_SVG + '</span>';
   }
-  if (drillSelCity) {
-    html += '<span class="drill-tag" onclick="selectCity(null,\x27\x27);drillSearch();">' + drillSelCity + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>';
+  for (const city of drillSelCities) {
+    html += '<span class="drill-tag" onclick="removeCity(\'' + city + '\');drillSearch();">' + city + ' ' + TAG_X_SVG + '</span>';
   }
   el.innerHTML = html;
 }
@@ -1108,7 +1207,6 @@ function renderDrillResults() {
   }
   tbody.innerHTML = html;
 
-  // Pagination
   const pagEl = document.getElementById('drillPagination');
   if (totalPages <= 1) { pagEl.style.display = 'none'; return; }
   pagEl.style.display = 'block';
@@ -1144,6 +1242,25 @@ function goDrillPage(p) {
   drillPage = p;
   renderDrillResults();
   document.getElementById('priceSub1').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ── Excel export ── */
+function drillExportExcel() {
+  if (drillResults.length === 0) return;
+  const rows = drillResults.map(r => ({
+    '行业类目': r[0].split(';').slice(1).join(' > '),
+    '城市': r[1],
+    '金额(元/月)': r[2],
+    '刊例价/月(元)': r[3]
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:24},{wch:14},{wch:14},{wch:16}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '钻展报价');
+  const catLabel = drillSelCats.length > 0 ? '类目' + drillSelCats.length + '项' : '全类目';
+  const cityLabel = drillSelCities.length > 0 ? '城市' + drillSelCities.length + '个' : '全城市';
+  const fname = '钻展报价_' + catLabel + '_' + cityLabel + '_' + drillResults.length + '条.xlsx';
+  XLSX.writeFile(wb, fname);
 }
 
 // Init on DOM ready

@@ -1940,14 +1940,14 @@ function caseClose(e) {
 /* ── Price sub-tabs ── */
 var _dataLoaded = {};
 var _DATA_MAP = {
-  0: { file: 'data/drill_data.json', vars: ['DRILL_DATA','DRILL_CATS','DRILL_CITIES','DRILL_TOP_CATS'], after: function(){ initDrillSelects(); drillRender(); } },
-  1: { file: 'data/ding_data.json', vars: ['DING_DATA','DING_CATS','DING_CITIES','DING_DISTS','DING_TOP_CATS'], after: function(){ initDingSelects(); dingRender(); } },
-  2: { file: 'data/mall_data.json', vars: ['MALL_DATA','MALL_CITIES'], after: function(){ initSpMallSelects(); spMallRender(); } },
-  3: { file: 'data/cb_data.json', vars: ['CB_DATA','CB_CATS'], after: function(){ initCbSelects(); cbRender(); } },
-  4: { file: 'data/inv_ledger_data.json', vars: ['INV_LEDGER_DATA','INV_LEDGER_CITIES','INV_LEDGER_BIZ','INV_LEDGER_PROD'], after: function(){ invLedgerInitSelects(); invLedgerRender(); } }
+  0: { file: 'data/drill_data.json', vars: ['DRILL_DATA','DRILL_CATS','DRILL_CITIES','DRILL_TOP_CATS'], after: function(){ initDrillSelects(); } },
+  1: { file: 'data/ding_data.json', vars: ['DING_DATA','DING_CATS','DING_CITIES','DING_DISTS','DING_TOP_CATS'], after: function(){ initDingSelects(); } },
+  2: { file: 'data/mall_data.json', vars: ['MALL_DATA','MALL_CITIES'], after: function(){ initSpMallSelects(); } },
+  3: { file: 'data/cb_data.json', vars: ['CB_DATA','CB_CATS'], after: function(){ initCbSelects(); cbRenderResults(); } },
+  4: { file: 'data/inv_ledger_data.json', vars: ['INV_LEDGER_DATA','INV_LEDGER_CITIES','INV_LEDGER_BIZ','INV_LEDGER_PROD'], after: function(){ invLedgerInitSelects(); invLedgerFilter(); } }
 };
 /* Also load expo_data when priceSub2 opens */
-var _EXPO_EXTRA = { file: 'data/expo_data.json', vars: ['EXPO_DATA','EXPO_CITIES'], after: function(){ initSpExpoSelects(); spExpoRender(); } };
+var _EXPO_EXTRA = { file: 'data/expo_data.json', vars: ['EXPO_DATA','EXPO_CITIES'], after: function(){ initSpExpoSelects(); } };
 
 function _showLoading(panel, show) {
   if (!panel) return;
@@ -2011,10 +2011,10 @@ window.addEventListener('load', function() {
 });
 
 /* ── Drill pricing data ── */
-let DRILL_DATA=[]; /* lazy-loaded from data/ */
-let DRILL_CATS=[]; /* lazy-loaded from data/ */
-let DRILL_CITIES=[]; /* lazy-loaded from data/ */
-let DRILL_TOP_CATS={}; /* lazy-loaded from data/ */
+var DRILL_DATA=[]; /* lazy-loaded from data/ */
+var DRILL_CATS=[]; /* lazy-loaded from data/ */
+var DRILL_CITIES=[]; /* lazy-loaded from data/ */
+var DRILL_TOP_CATS={}; /* lazy-loaded from data/ */
 
 /* ── Drill pricing state ── */
 let drillSelCats = [];  // multi-select: array of category strings
@@ -2289,23 +2289,23 @@ function drillExportExcel() {
 
 
 /* ── 水牌报价数据 ── */
-let MALL_DATA=[]; /* lazy-loaded from data/ */
-let MALL_CITIES=[]; /* lazy-loaded from data/ */
+var MALL_DATA=[]; /* lazy-loaded from data/ */
+var MALL_CITIES=[]; /* lazy-loaded from data/ */
 const MALL_GRADES=["A","B","C","D","S"];
 const SUPER_DATA=[["北京市","T0"],["上海市","T0"],["广州市","T0"],["杭州市","T0"],["深圳市","T0"],["成都市","T0"],["西安市","T0"],["重庆市","T1"],["武汉市","T1"],["南京市","T1"],["天津市","T1"],["苏州市","T1"],["郑州市","T1"],["青岛市","T1"],["东莞市","T1"],["长沙市","T1"],["合肥市","T1"],["济南市","T1"],["沈阳市","T2"],["宁波市","T2"],["佛山市","T2"],["无锡市","T2"],["南昌市","T2"],["大连市","T2"],["嘉兴市","T2"],["福州市","T2"],["昆明市","T2"],["厦门市","T2"],["哈尔滨市","T2"],["南宁市","T2"],["其他","T3"]];
 const SUPER_LEVELS=["T0","T1","T2","T3"];
-let EXPO_DATA=[]; /* lazy-loaded from data/ */
-let EXPO_CITIES=[]; /* lazy-loaded from data/ */
+var EXPO_DATA=[]; /* lazy-loaded from data/ */
+var EXPO_CITIES=[]; /* lazy-loaded from data/ */
 const EXPO_GRADES=["A","B","C","D","S"];
 
 // Init on DOM ready
 
 /* ── 顶展报价数据 ── */
-let DING_DATA=[]; /* lazy-loaded from data/ */
-let DING_CATS=[]; /* lazy-loaded from data/ */
-let DING_CITIES=[]; /* lazy-loaded from data/ */
-let DING_DISTS=[]; /* lazy-loaded from data/ */
-let DING_TOP_CATS={}; /* lazy-loaded from data/ */
+var DING_DATA=[]; /* lazy-loaded from data/ */
+var DING_CATS=[]; /* lazy-loaded from data/ */
+var DING_CITIES=[]; /* lazy-loaded from data/ */
+var DING_DISTS=[]; /* lazy-loaded from data/ */
+var DING_TOP_CATS={}; /* lazy-loaded from data/ */
 
 
 /* ── 顶展报价逻辑 ── */
@@ -2781,8 +2781,8 @@ function renderSpPagination(totalPages, prefix, currentPage) {
 /* initDrillSelects called after DRILL data loads via lazy loader */
 
 /* ── 类目词包距离查询 (CB) ── */
-let CB_DATA=[]; /* lazy-loaded from data/ */
-let CB_CATS=[]; /* lazy-loaded from data/ */
+var CB_DATA=[]; /* lazy-loaded from data/ */
+var CB_CATS=[]; /* lazy-loaded from data/ */
 var cbSelCats=[];
 var cbResults=[];
 var cbPage=1;
@@ -2936,8 +2936,8 @@ function cbExport(){
 // ═══ 库存占量表 ═══
 var INV_LEDGER_UPDATED='2026-07-14 09:31';
 var INV_LEDGER_DATA=[]; /* lazy-loaded from data/ */
-let INV_LEDGER_CITIES=[]; /* lazy-loaded from data/ */
-let INV_LEDGER_BIZ=[]; /* lazy-loaded from data/ */
+var INV_LEDGER_CITIES=[]; /* lazy-loaded from data/ */
+var INV_LEDGER_BIZ=[]; /* lazy-loaded from data/ */
 var INV_LEDGER_PROD=[]; /* lazy-loaded from data/ */
 var invLedgerFiltered=INV_LEDGER_DATA.slice();
 var invLedgerPage=1,invLedgerPageSize=50;

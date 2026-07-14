@@ -441,12 +441,39 @@ document.getElementById('lb-close').addEventListener('click', ()=>document.getEl
 document.getElementById('lb').addEventListener('click', e => { if(e.target.id==='lb') e.currentTarget.classList.remove('on'); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('lb').classList.remove('on'); });
 
-/* PPT Generation */
+/* PPT Generation - Image Preloader */
+var IMGS_B64 = {};
+var IMGS_READY = false;
+function preloadImagesForPPT() {
+  var keys = Object.keys(IMGS);
+  var promises = keys.map(function(key) {
+    return fetch(IMGS[key])
+      .then(function(r) { return r.blob(); })
+      .then(function(blob) {
+        return new Promise(function(resolve) {
+          var reader = new FileReader();
+          reader.onloadend = function() { IMGS_B64[key] = reader.result; resolve(); };
+          reader.readAsDataURL(blob);
+        });
+      })
+      .catch(function(err) { console.warn('Failed to preload image:', key, err); });
+  });
+  return Promise.all(promises).then(function() { IMGS_READY = true; });
+}
+// Start preloading after page load
+window.addEventListener('load', function() { preloadImagesForPPT(); });
+
 function generatePPT(merchant, matchedProducts, whyMap) {
   if (typeof PptxGenJS === 'undefined') {
     alert('PPT生成组件加载中，请稍后重试…');
     return;
   }
+  if (!IMGS_READY) {
+    alert('图片资源加载中，请稍后重试…');
+    return;
+  }
+  // Use base64 images for PPT generation
+  var IMGS_USE = IMGS_B64;
   const deck = new PptxGenJS();
   const bname = merchant.brand || merchant.name;
   deck.layout = 'LAYOUT_16x9';
@@ -477,7 +504,7 @@ function generatePPT(merchant, matchedProducts, whyMap) {
   ['intro1','intro2','intro3'].forEach(function(ik){
     var is = deck.addSlide();
     is.background = {color:'0B1A2F'};
-    is.addImage({data:IMGS[ik], x:0, y:0, w:10, h:5.625, sizing:{type:'contain', w:10, h:5.625}});
+    is.addImage({data:IMGS_USE[ik], x:0, y:0, w:10, h:5.625, sizing:{type:'contain', w:10, h:5.625}});
   });
 
   // 单案例整页：样式化页眉 + 单张高清案例图铺满
@@ -492,7 +519,7 @@ function generatePPT(merchant, matchedProducts, whyMap) {
     cs.addShape(deck.shapes.RECTANGLE, {x:7.4,y:0.26,w:2.25,h:0.62,fill:{color:cfg.chipBg}});
     cs.addText(cfg.metric, {x:7.4,y:0.29,w:2.25,h:0.34,fontSize:15,fontFace:'PingFang SC',bold:true,color:cfg.chipFg,align:'center',valign:'middle',margin:0});
     cs.addText(cfg.metricSub, {x:7.4,y:0.62,w:2.25,h:0.23,fontSize:8.5,fontFace:'PingFang SC',color:cfg.chipFg,align:'center',valign:'middle',margin:0});
-    cs.addImage({data:IMGS[cfg.img], x:0.3, y:1.02, w:9.4, h:4.4, sizing:{type:'contain', w:9.4, h:4.4}});
+    cs.addImage({data:IMGS_USE[cfg.img], x:0.3, y:1.02, w:9.4, h:4.4, sizing:{type:'contain', w:9.4, h:4.4}});
     cs.addText('高德本地生活 · '+cfg.badge+'精选案例（可缩放查看）', {x:0.3,y:5.48,w:9.4,h:0.12,fontSize:8,fontFace:'PingFang SC',color:C.dim,align:'right',margin:0});
   }
   var TOP_CASES = [
@@ -520,7 +547,7 @@ function generatePPT(merchant, matchedProducts, whyMap) {
     s.addText(prod.tag, {x:7.6,y:0.22,w:2.1,h:0.34,fontSize:10,fontFace:'PingFang SC',bold:true,color:C.yellow,align:'center',valign:'middle',margin:0});
 
     // Left: one-pager image
-    const imgData = IMGS[prod.img];
+    const imgData = IMGS_USE[prod.img];
     s.addShape(deck.shapes.RECTANGLE, {x:0.25,y:0.75,w:3.5,h:4.65,fill:{color:C.card},line:{color:C.line,width:1}});
     s.addImage({data:imgData,x:0.35,y:0.85,w:3.3,h:4.45,sizing:{type:'contain',w:3.3,h:4.45}});
 
@@ -569,7 +596,7 @@ function generatePPT(merchant, matchedProducts, whyMap) {
       ['case2','case3'].forEach(function(ck){
         var cs = deck.addSlide();
         cs.background = {color:'0B1A2F'};
-        cs.addImage({data:IMGS[ck], x:0, y:0, w:10, h:5.625, sizing:{type:'contain', w:10, h:5.625}});
+        cs.addImage({data:IMGS_USE[ck], x:0, y:0, w:10, h:5.625, sizing:{type:'contain', w:10, h:5.625}});
       });
     }
 
@@ -577,7 +604,7 @@ function generatePPT(merchant, matchedProducts, whyMap) {
     if (prod.key === 'brand') {
       var bs = deck.addSlide();
       bs.background = {color:'0B1A2F'};
-      bs.addImage({data:IMGS.case_brand, x:0, y:0, w:10, h:5.625, sizing:{type:'contain', w:10, h:5.625}});
+      bs.addImage({data:IMGS_USE.case_brand, x:0, y:0, w:10, h:5.625, sizing:{type:'contain', w:10, h:5.625}});
     }
 
     // 顶展页之后插入顶展标杆案例（每案例整页高清）

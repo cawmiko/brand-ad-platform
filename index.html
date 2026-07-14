@@ -399,6 +399,10 @@
   .review-upload-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; gap:6px; }
   .review-upload-placeholder span { font-size:12px; color:#94a3b8; }
   .review-upload img { width:100%; height:auto; border-radius:6px; display:block; }
+  .review-img-del {
+    position:absolute; top:6px; right:6px; width:26px; height:26px; border:none; border-radius:50%; background:rgba(239,68,68,0.9); color:#fff; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; transition:background 0.2s;
+  }
+  .review-img-del:hover { background:rgba(220,38,38,1); }
   .review-gen-btn {
     width:100%; padding:12px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-size:14px; font-weight:600; cursor:pointer; transition:background 0.2s; margin-top:8px;
   }
@@ -1640,6 +1644,7 @@
               <span>点击上传投放前喜报</span>
             </div>
             <img id="rv_preview_before" style="display:none;">
+            <button class="review-img-del" id="rv_del_before" style="display:none;" onclick="reviewRemoveImg('before')" title="删除图片">✕</button>
           </div>
         </div>
         <div class="review-field">
@@ -1651,6 +1656,7 @@
               <span>点击上传投放后喜报</span>
             </div>
             <img id="rv_preview_after" style="display:none;">
+            <button class="review-img-del" id="rv_del_after" style="display:none;" onclick="reviewRemoveImg('after')" title="删除图片">✕</button>
           </div>
         </div>
         <div class="review-field">
@@ -1730,6 +1736,7 @@ function switchMod(idx) {
   var fileInput = document.getElementById('rv_file_'+which);
   var preview = document.getElementById('rv_preview_'+which);
   var placeholder = document.querySelector('#rv_upload_'+which+' .review-upload-placeholder');
+  var delBtn = document.getElementById('rv_del_'+which);
   fileInput.addEventListener('change', function(e){
     var file = e.target.files[0];
     if(!file) return;
@@ -1738,10 +1745,23 @@ function switchMod(idx) {
       preview.src = ev.target.result;
       preview.style.display = 'block';
       placeholder.style.display = 'none';
+      delBtn.style.display = 'flex';
     };
     reader.readAsDataURL(file);
   });
 });
+
+function reviewRemoveImg(which){
+  var preview = document.getElementById('rv_preview_'+which);
+  var placeholder = document.querySelector('#rv_upload_'+which+' .review-upload-placeholder');
+  var delBtn = document.getElementById('rv_del_'+which);
+  var fileInput = document.getElementById('rv_file_'+which);
+  preview.src = '';
+  preview.style.display = 'none';
+  placeholder.style.display = 'flex';
+  delBtn.style.display = 'none';
+  fileInput.value = '';
+}
 
 function reviewGenerate(){
   var name = document.getElementById('rv_name').value.trim() || '某餐饮店';

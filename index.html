@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>交易渠道品广一站式平台</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root {
     --bg: #ffffff;
@@ -378,6 +379,59 @@
   }
   @keyframes tagIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Review Tool ── */
+  .review-tool { display:flex; height:calc(100vh - 56px); overflow:hidden; }
+  .review-form-wrap { width:380px; flex-shrink:0; overflow-y:auto; padding:24px; border-right:1px solid var(--border); background:#fff; }
+  .review-form-header { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .review-form-header h3 { font-size:18px; font-weight:700; color:var(--text-primary); margin:0; }
+  .review-form-desc { font-size:13px; color:var(--text-secondary); margin:0 0 20px; }
+  .review-field { margin-bottom:16px; }
+  .review-field label { display:block; font-size:12px; font-weight:600; color:var(--text-primary); margin-bottom:5px; }
+  .review-field input, .review-field select, .review-field textarea {
+    width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; color:var(--text-primary); background:#fff; box-sizing:border-box; outline:none; transition:border-color 0.2s;
+  }
+  .review-field input:focus, .review-field select:focus, .review-field textarea:focus { border-color:var(--accent); }
+  .review-upload {
+    border:2px dashed var(--border); border-radius:8px; min-height:100px; cursor:pointer; position:relative; overflow:hidden; transition:border-color 0.2s;
+  }
+  .review-upload:hover { border-color:var(--accent); }
+  .review-upload-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; gap:6px; }
+  .review-upload-placeholder span { font-size:12px; color:#94a3b8; }
+  .review-upload img { width:100%; height:auto; border-radius:6px; display:block; }
+  .review-gen-btn {
+    width:100%; padding:12px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-size:14px; font-weight:600; cursor:pointer; transition:background 0.2s; margin-top:8px;
+  }
+  .review-gen-btn:hover { background:#1d4ed8; }
+  .review-preview-wrap { flex:1; overflow-y:auto; padding:24px; background:#f8f9fb; display:flex; flex-direction:column; align-items:center; }
+  .review-preview-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; gap:12px; color:#94a3b8; font-size:14px; text-align:center; }
+  .review-case-card {
+    width:100%; max-width:520px; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 16px rgba(0,0,0,0.08); border:1px solid var(--border);
+  }
+  .rv-card-header { background:linear-gradient(135deg,#0f172a,#1e3a5f); padding:24px 20px 18px; color:#fff; }
+  .rv-card-badge { display:inline-block; background:#3b82f6; color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:4px; margin-bottom:8px; letter-spacing:0.5px; }
+  .rv-card-title { font-size:18px; font-weight:700; margin-bottom:4px; }
+  .rv-card-sub { font-size:11px; color:#94a3b8; }
+  .rv-card-body { padding:16px 20px; }
+  .rv-card-section { margin-bottom:14px; }
+  .rv-section-title { font-size:12px; font-weight:700; color:var(--accent); margin-bottom:5px; display:flex; align-items:center; gap:4px; }
+  .rv-section-title::before { content:''; display:inline-block; width:3px; height:12px; background:var(--accent); border-radius:2px; }
+  .rv-section-content { font-size:12px; color:#475569; line-height:1.7; }
+  .rv-card-images { display:flex; gap:8px; margin-bottom:14px; }
+  .rv-img-box { flex:1; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  .rv-img-label { background:#f1f5f9; font-size:10px; font-weight:600; color:#64748b; padding:4px 8px; text-align:center; }
+  .rv-img-box img { width:100%; height:auto; display:block; }
+  .rv-card-footer { display:flex; justify-content:space-between; padding:10px 20px; background:#f8f9fb; font-size:10px; color:#94a3b8; border-top:1px solid var(--border); }
+  .review-actions { display:flex; gap:10px; margin-top:16px; width:100%; max-width:520px; }
+  .review-dl-btn { flex:1; padding:10px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
+  .review-prompt-btn { flex:1; padding:10px; border:1px solid var(--border); border-radius:8px; background:#fff; color:var(--text-primary); font-size:13px; font-weight:600; cursor:pointer; }
+  .review-dl-btn:hover { background:#1d4ed8; }
+  .review-prompt-btn:hover { background:#f1f5f9; }
+  @media (max-width:900px) {
+    .review-tool { flex-direction:column; height:auto; }
+    .review-form-wrap { width:100%; border-right:none; border-bottom:1px solid var(--border); }
+    .review-preview-wrap { min-height:400px; }
+  }
   .drill-sel-tag .tag-x {
     width: 14px; height: 14px; cursor: pointer; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -475,6 +529,10 @@
       <div class="nav-item" onclick="switchMod(5)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         一键生成KA商家PPT方案
+      </div>
+      <div class="nav-item" onclick="switchMod(6)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        自助复盘
       </div>
     </div>
     <div class="visitor-count" id="visitorCount">
@@ -1523,6 +1581,137 @@
   </div>
 </div>
 
+<div class="mod-panel" id="mod7">
+  <div class="review-tool">
+    <div class="review-form-wrap">
+      <div class="review-form-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <h3>自助复盘工具</h3>
+      </div>
+      <p class="review-form-desc">输入商户信息，上传投放前后经营喜报，一键生成案例一页纸</p>
+      <div class="review-form">
+        <div class="review-field">
+          <label>商户名称</label>
+          <input type="text" id="rv_name" placeholder="例：南湾湖农家乐">
+        </div>
+        <div class="review-field">
+          <label>省/市</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="rv_province" placeholder="河南省" style="flex:1;">
+            <input type="text" id="rv_city" placeholder="信阳市" style="flex:1;">
+          </div>
+        </div>
+        <div class="review-field">
+          <label>类目</label>
+          <input type="text" id="rv_category" placeholder="例：农家乐">
+        </div>
+        <div class="review-field">
+          <label>投放产品</label>
+          <select id="rv_product">
+            <option value="顶展" selected>顶展</option>
+            <option value="钻展">钻展</option>
+            <option value="品牌专区">品牌专区</option>
+            <option value="品牌智能体">品牌智能体</option>
+            <option value="效果广告">效果广告</option>
+          </select>
+        </div>
+        <div class="review-field">
+          <label>产品价值（一句话描述）</label>
+          <input type="text" id="rv_value" placeholder="抢占行业用户高意图搜索词核心展位，强势曝光" value="抢占行业用户高意图搜索词核心展位，强势曝光">
+        </div>
+        <div class="review-field">
+          <label>投放日期</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="rv_date_start" placeholder="4.17" style="flex:1;">
+            <span style="color:var(--text-secondary);">至</span>
+            <input type="text" id="rv_date_end" placeholder="5.20" style="flex:1;">
+          </div>
+        </div>
+        <div class="review-field">
+          <label>数据观察期</label>
+          <input type="text" id="rv_observe" placeholder="4.20-5.20">
+        </div>
+        <div class="review-field">
+          <label>投放前经营喜报 <small style="color:#94a3b8;">（上传截图）</small></label>
+          <div class="review-upload" id="rv_upload_before">
+            <input type="file" accept="image/*" id="rv_file_before" style="display:none;">
+            <div class="review-upload-placeholder" onclick="document.getElementById('rv_file_before').click()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>点击上传投放前喜报</span>
+            </div>
+            <img id="rv_preview_before" style="display:none;">
+          </div>
+        </div>
+        <div class="review-field">
+          <label>投放后经营喜报 <small style="color:#94a3b8;">（上传截图）</small></label>
+          <div class="review-upload" id="rv_upload_after">
+            <input type="file" accept="image/*" id="rv_file_after" style="display:none;">
+            <div class="review-upload-placeholder" onclick="document.getElementById('rv_file_after').click()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>点击上传投放后喜报</span>
+            </div>
+            <img id="rv_preview_after" style="display:none;">
+          </div>
+        </div>
+        <div class="review-field">
+          <label>补充说明 <small style="color:#94a3b8;">（可选）</small></label>
+          <textarea id="rv_notes" rows="2" placeholder="例：门店靠近景区，顶展与景点客流天然契合"></textarea>
+        </div>
+        <button class="review-gen-btn" onclick="reviewGenerate()">生成案例一页纸</button>
+      </div>
+    </div>
+    <div class="review-preview-wrap" id="rvPreviewWrap">
+      <div class="review-preview-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 16l5-5 4 4 4-6 5 7"/></svg>
+        <p>填写信息并上传喜报后<br>点击生成按钮预览案例</p>
+      </div>
+      <div class="review-case-card" id="rvCaseCard" style="display:none;">
+        <div class="rv-card-header">
+          <div class="rv-card-badge" id="rvBadge">顶展</div>
+          <div class="rv-card-title" id="rvTitle">信阳市 · 农家乐 · 顶展案例</div>
+          <div class="rv-card-sub" id="rvSub">投放前 4.17 → 数据观察期 4.20-5.20</div>
+        </div>
+        <div class="rv-card-body">
+          <div class="rv-card-section">
+            <div class="rv-section-title">商户概况</div>
+            <div class="rv-section-content" id="rvMerchantInfo">—</div>
+          </div>
+          <div class="rv-card-section">
+            <div class="rv-section-title">产品价值</div>
+            <div class="rv-section-content" id="rvProductValue">—</div>
+          </div>
+          <div class="rv-card-images">
+            <div class="rv-img-box">
+              <div class="rv-img-label">投放前</div>
+              <img id="rvCaseImgBefore" src="">
+            </div>
+            <div class="rv-img-box">
+              <div class="rv-img-label">投放后</div>
+              <img id="rvCaseImgAfter" src="">
+            </div>
+          </div>
+          <div class="rv-card-section">
+            <div class="rv-section-title">经营数据变化</div>
+            <div class="rv-section-content" id="rvDataSummary">—</div>
+          </div>
+          <div class="rv-card-section">
+            <div class="rv-section-title">分析总结</div>
+            <div class="rv-section-content" id="rvAnalysis">—</div>
+          </div>
+        </div>
+        <div class="rv-card-footer">
+          <span>高德本地生活 · 品广团队</span>
+          <span id="rvCaseDate">2026-07</span>
+        </div>
+      </div>
+      <div class="review-actions" id="rvActions" style="display:none;">
+        <button class="review-dl-btn" onclick="reviewDownload()">下载案例图片</button>
+        <button class="review-prompt-btn" onclick="reviewShowPrompt()">复制AI分析指令</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 function switchMod(idx) {
   document.querySelectorAll('#mainNav .nav-item').forEach((t,i) => t.classList.toggle('active', i===idx));
@@ -1534,6 +1723,143 @@ function switchMod(idx) {
   }
   window.scrollTo(0,0);
 }
+
+/* ── Review Tool JS ── */
+// Image upload handlers
+['before','after'].forEach(function(which){
+  var fileInput = document.getElementById('rv_file_'+which);
+  var preview = document.getElementById('rv_preview_'+which);
+  var placeholder = document.querySelector('#rv_upload_'+which+' .review-upload-placeholder');
+  fileInput.addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      preview.src = ev.target.result;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function reviewGenerate(){
+  var name = document.getElementById('rv_name').value.trim() || '某餐饮店';
+  var province = document.getElementById('rv_province').value.trim() || '';
+  var city = document.getElementById('rv_city').value.trim() || '';
+  var category = document.getElementById('rv_category').value.trim() || '餐饮';
+  var product = document.getElementById('rv_product').value || '顶展';
+  var prodValue = document.getElementById('rv_value').value.trim() || '';
+  var dateStart = document.getElementById('rv_date_start').value.trim() || '';
+  var dateEnd = document.getElementById('rv_date_end').value.trim() || '';
+  var observe = document.getElementById('rv_observe').value.trim() || '';
+  var notes = document.getElementById('rv_notes').value.trim() || '';
+  var loc = [province, city].filter(Boolean).join(' ');
+
+  // Anonymize name
+  var anonName = loc + '某' + category + '店';
+
+  // Fill card
+  document.getElementById('rvBadge').textContent = product;
+  document.getElementById('rvTitle').textContent = (city||loc) + ' · ' + category + ' · ' + product + '案例';
+  document.getElementById('rvSub').textContent = '投放日 ' + (dateStart||'—') + (dateEnd ? ' → 数据观察期 ' + observe : '');
+  document.getElementById('rvMerchantInfo').innerHTML =
+    '商户位于<strong>' + (loc||'某地') + '</strong>，主营<strong>' + category + '</strong>品类。' +
+    '商家于' + (dateStart||'投放日') + '开通高德品牌广告「<strong>' + product + '</strong>」产品。' +
+    (notes ? '<br>' + notes : '');
+  document.getElementById('rvProductValue').textContent = prodValue || '—';
+  document.getElementById('rvCaseDate').textContent = new Date().toISOString().slice(0,7);
+
+  // Images
+  var beforeImg = document.getElementById('rv_preview_before').src;
+  var afterImg = document.getElementById('rv_preview_after').src;
+  if(beforeImg && beforeImg !== '') {
+    document.getElementById('rvCaseImgBefore').src = beforeImg;
+    document.getElementById('rvCaseImgBefore').parentElement.style.display = '';
+  }
+  if(afterImg && afterImg !== '') {
+    document.getElementById('rvCaseImgAfter').src = afterImg;
+    document.getElementById('rvCaseImgAfter').parentElement.style.display = '';
+  }
+
+  // Data summary placeholder
+  document.getElementById('rvDataSummary').innerHTML =
+    '<em style="color:#94a3b8;">请结合上传的投放前后经营喜报截图，提取关键数据变化指标。</em>';
+  document.getElementById('rvAnalysis').innerHTML =
+    '<em style="color:#94a3b8;">请点击「复制AI分析指令」，将指令与喜报图片一起发送给AI，获取专业分析。</em>';
+
+  // Show card
+  document.querySelector('.review-preview-empty').style.display = 'none';
+  document.getElementById('rvCaseCard').style.display = '';
+  document.getElementById('rvActions').style.display = 'flex';
+}
+
+function reviewShowPrompt(){
+  var name = document.getElementById('rv_name').value.trim() || '某餐饮店';
+  var province = document.getElementById('rv_province').value.trim() || '';
+  var city = document.getElementById('rv_city').value.trim() || '';
+  var category = document.getElementById('rv_category').value.trim() || '餐饮';
+  var product = document.getElementById('rv_product').value || '顶展';
+  var prodValue = document.getElementById('rv_value').value.trim() || '';
+  var dateStart = document.getElementById('rv_date_start').value.trim() || '';
+  var dateEnd = document.getElementById('rv_date_end').value.trim() || '';
+  var observe = document.getElementById('rv_observe').value.trim() || '';
+  var notes = document.getElementById('rv_notes').value.trim() || '';
+  var loc = [province, city].filter(Boolean).join('');
+
+  var prompt =
+    '你是一名高德地图资深的美食商户运营专家。\n\n' +
+    '以下是1个' + loc + '的' + category + '类目餐饮店（案例中不展示门店真实名称，用"某' + category + '店"代替）。\n' +
+    '这个老板在' + dateStart + '做了高德的品牌广告叫' + product + '，' +
+    '这个产品价值是：' + prodValue + '。\n' +
+    '以下是' + observe + '商家的经营数据（见图片）。\n\n' +
+    '请你结合图片产出一页纸案例，要求：\n' +
+    '1. 重点突出门店的经营数据变化\n' +
+    '2. 分析总结门店经营沉淀\n' +
+    '3. 针对图片数据不同进行二次理解，只进行汇总展示\n' +
+    '4. 数据不要重复罗列堆叠\n' +
+    '5. ' + product + '本身只是起到辅助作用，门店高品质加上CPC广告加上合作' + product + '，最终使门店各项数据综合增长\n' +
+    (notes ? '6. 补充说明：' + notes + '\n' : '') +
+    '7. 注意案例内不要展示门店真实名字\n\n' +
+    '最终输出格式：\n' +
+    '标题：[城市]-[类目]-' + product + '案例\n' +
+    '包含：商户概况、产品价值、投放前后数据对比、分析总结';
+
+  // Copy to clipboard
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(prompt).then(function(){
+      alert('AI分析指令已复制到剪贴板！\n\n请将此指令连同经营喜报图片一起发送给AI助手。');
+    });
+  } else {
+    // Fallback
+    var ta = document.createElement('textarea');
+    ta.value = prompt;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('AI分析指令已复制到剪贴板！');
+  }
+}
+
+function reviewDownload(){
+  var card = document.getElementById('rvCaseCard');
+  // Use html2canvas if available, otherwise fallback to print
+  if(typeof html2canvas !== 'undefined'){
+    html2canvas(card, {scale:2, backgroundColor:'#ffffff'}).then(function(canvas){
+      var link = document.createElement('a');
+      var city = document.getElementById('rv_city').value.trim() || '某地';
+      var category = document.getElementById('rv_category').value.trim() || '案例';
+      var product = document.getElementById('rv_product').value || '顶展';
+      link.download = city + '-' + category + '-' + product + '案例.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  } else {
+    alert('截图组件加载中，请稍后重试…');
+  }
+}
+
 /* ── Visitor counter ── */
 (function(){
   fetch('https://api.counterapi.dev/v1/cawmiko-brand-ad-platform/visits/up')
